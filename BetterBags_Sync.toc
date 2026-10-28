@@ -1,11 +1,14 @@
 ## Interface: 120105, 50504, 40402, 38002, 30405, 20506, 16001, 11509
 ## Title: BetterBags - Sync
 ## Category: Inventory
-## Notes: Shows in item tooltips how many of an item your other characters have, from what BetterBags reads.
+## Notes: Shows in item tooltips how many of an item your other characters have in their bags and banks
 ## Author: OrenYoh
 ## Version: 1.0.0
+## IconTexture: Interface\AddOns\BetterBags_Sync\images\sync.png
 ## Dependencies: BetterBags
 ## SavedVariables: BetterBags_SyncDB
+## X-Curse-Project-ID: 1771418
+## X-Wago-ID: Q6aqDq6W
 
 # Locales
 i18n\enUS.lua
