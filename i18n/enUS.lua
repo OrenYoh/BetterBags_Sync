@@ -1,0 +1,40 @@
+local L, _, ns = {}, ...;
+
+ns.L = setmetatable(L,{__index=function(t,k)
+    local v = tostring(k);
+    rawset(t,k,v);
+    return v;
+end});
+
+L["BAGS"] = "Bags";
+L["BANK"] = "Bank";
+L["WARBAND_BANK"] = "Warband Bank";
+L["TOTAL"] = "Total";
+L["SLASH_HELP"] = "Commands: /bbsync gold, /bbsync list, /bbsync remove <Name-Realm or Guild-Realm>";
+L["SLASH_LIST"] = "Known characters:";
+L["SLASH_REMOVED"] = "Removed _name_.";
+L["SLASH_UNKNOWN"] = "No character named _name_.";
+L["SLASH_CURRENT"] = "You can't remove the character you're playing.";
+L["EQUIPPED"] = "Equipped";
+L["MAIL"] = "Mail";
+L["TITLE"] = "Sync";
+L["OPTIONS_DESC"] = "Choose which characters and guilds item tooltips list.";
+L["OPTIONS_SHOW_CURRENT"] = "Show the character you are playing";
+L["OPTIONS_SHOW_GUILDS"] = "Show guild banks";
+L["OPTIONS_FACTION"] = "Factions";
+L["OPTIONS_FACTION_ALL"] = "All factions";
+L["OPTIONS_FACTION_SAME"] = "Your faction only";
+L["OPTIONS_REALMS"] = "Realms";
+L["OPTIONS_REALMS_ALL"] = "All realms";
+L["OPTIONS_REALMS_CONNECTED"] = "Connected realms";
+L["OPTIONS_REALMS_CURRENT"] = "Your realm only";
+L["VOID"] = "Void Storage";
+L["GOLD_TITLE"] = "Gold:";
+L["POPOUT_TITLE"] = "BetterBags - Sync";
+L["OPTIONS_MODIFIER"] = "Show only while holding";
+L["OPTIONS_MODIFIER_NONE"] = "Always show";
+L["OPTIONS_MODIFIER_SHIFT"] = "Shift";
+L["OPTIONS_MODIFIER_CTRL"] = "Ctrl";
+L["OPTIONS_MODIFIER_ALT"] = "Alt";
+L["OPTIONS_POPOUT"] = "Show in a separate tooltip";
+L["OPTIONS_POPOUT_DESC"] = "Shows the counts in a tooltip of their own, under the item's, instead of adding them to it.";

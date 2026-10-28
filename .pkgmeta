@@ -1,0 +1,6 @@
+package-as: BetterBags_Sync
+
+ignore:
+  - .github
+  - .gitignore
+  - .pkgmeta
