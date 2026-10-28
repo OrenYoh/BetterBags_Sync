@@ -1,19 +1,13 @@
 <h1 align="center">BetterBags - Sync &bull; a BetterBags plugin</h1>
-<p>Shows in every item tooltip how many of that item each of your characters and guilds has, and where.</p>
-<p>It reuses what BetterBags already reads: each time BetterBags reads a character's bags, bank or guild bank, the counts are saved. Hovering an item (in your bags, a chat link, the auction house...) then lists every character holding it, split between bags, bank, equipped, mail and void storage, then your guild banks, the Warband bank and the total. Caged battle pets are counted by species and shown in the pet's tooltip.</p>
-<p>What it tracks:</p>
-<ul>
-<li>Bags (with the bags themselves in their slots), bank and Warband bank.</li>
-<li>Equipped gear, profession gear included.</li>
-<li>The mailbox, and mail sent to your other characters.</li>
-<li>Guild banks, tab by tab.</li>
-<li>Void storage (on the clients that still have it).</li>
-<li>Gold of every character, guild bank and the Warband bank: <code>/bbsync gold</code>.</li>
-<li>Currencies of every character, shown in currency tooltips (Warband-wide currencies, the same for everyone, are left out).</li>
-</ul>
-<p>Options (BetterBags settings, Integrations &gt; Sync): show the character you are playing, show guild banks, your faction only, all realms, connected realms or your realm only, show the counts only while holding Shift, Ctrl or Alt, and show them in a separate tooltip under the item's.</p>
-<ul>
-<li>A character's bank, mailbox and guild bank counts are as of the last time they were opened.</li>
-<li>Log in once on each character for it to show up.</li>
-<li><code>/bbsync gold</code> lists everyone's gold; <code>/bbsync list</code> lists the characters and guilds known; <code>/bbsync remove Name-Realm</code> forgets one (a deleted character, a guild you left).</li>
+<p align="center"><img src="https://media.forgecdn.net/attachments/description/null/description_8c82187c-7a0b-41e8-ae03-86e5b60fa33b.png" alt="BetterBags - Sync icon" width="300" height="300"></p>
+<p align="center"><a href="https://www.curseforge.com/wow/addons/betterbags-sync" target="_blank" rel="nofollow noopener"><img src="https://img.shields.io/badge/CurseForge-BetterBags_Sync-EB622B.svg?style=flat" alt="CurseForge BetterBags_Sync"></a> <a href="https://addons.wago.io/addons/addons/betterbags-sync" target="_blank" rel="nofollow noopener"><img src="https://img.shields.io/badge/Wago-BetterBags_Sync-B71D23.svg?style=flat" alt="Wago BetterBags_Sync"></a></p>
+<p>Adds a tooltip showing the items quantity stored in your other characters bags / banks, as well as gold and currencies.</p>
+<p dir="auto">What it tracks in details:</p>
+<ul dir="auto">
+<li>Bags, bank, guild banks and Warband bank</li>
+<li>Equipped gear</li>
+<li>The mailbox, and mail sent to your other characters</li>
+<li>Void storage (on older versions of the game)</li>
+<li>Gold of every character, guild bank and the Warband bank (use <code>/bbsync gold</code>&nbsp;to get a summary)</li>
+<li>Currencies of every character (warband-wide currencies, the same for everyone, are left out)</li>
 </ul>
