@@ -8,6 +8,6 @@
 <li>Equipped gear</li>
 <li>The mailbox, and mail sent to your other characters</li>
 <li>Void storage (on older versions of the game)</li>
-<li>Gold of every character, guild bank and the Warband bank (use <code>/bbsync gold</code>&nbsp;to get a summary)</li>
+<li>Gold of every character, guild bank and the Warband bank (hover the gold in your bags, or use <code>/bbsync gold</code>&nbsp;to get a summary)</li>
 <li>Currencies of every character (warband-wide currencies, the same for everyone, are left out)</li>
 </ul>

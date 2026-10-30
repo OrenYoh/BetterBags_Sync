@@ -865,8 +865,8 @@ local function coins(copper)
 end
 
 -- Every character's gold (as the options filter them), the most first, then the guilds' and the
--- Warband bank's, and the total.
-local function printGold()
+-- Warband bank's, and the total: { text, count }.
+local function goldRows()
     local rows, total = {}, 0
     for characterKey, character in pairs(db.characters) do
         if (character.money or 0) > 0 and characterShown(characterKey, character) then
@@ -880,21 +880,50 @@ local function printGold()
         if a.count ~= c.count then return a.count > c.count end
         return a.sort < c.sort
     end)
-    print(L["GOLD_TITLE"])
-    for _, row in ipairs(rows) do print("  " .. row.text .. ": " .. coins(row.count)) end
     if db.options.showGuilds then
         for _, guild in pairs(db.guilds) do
             if (guild.money or 0) > 0 and realmShown(guild.realm) and factionShown(guild.faction) then
-                print("  |cff40ff40<" .. displayName(guild.name or "?", guild.realm) .. ">|r: " .. coins(guild.money))
+                table.insert(rows, { text = "|cff40ff40<" .. displayName(guild.name or "?", guild.realm) .. ">|r", count = guild.money })
                 total = total + guild.money
             end
         end
     end
     if (db.warbandMoney or 0) > 0 then
-        print("  |cff00ccff" .. L["WARBAND_BANK"] .. "|r: " .. coins(db.warbandMoney))
+        table.insert(rows, { text = "|cff00ccff" .. L["WARBAND_BANK"] .. "|r", count = db.warbandMoney })
         total = total + db.warbandMoney
     end
-    print("  |cffffd100" .. L["TOTAL"] .. "|r: " .. coins(total))
+    table.insert(rows, { text = "|cffffd100" .. L["TOTAL"] .. "|r", count = total })
+    return rows
+end
+
+local function printGold()
+    print(L["GOLD_TITLE"])
+    for _, row in ipairs(goldRows()) do print("  " .. row.text .. ": " .. coins(row.count)) end
+end
+
+-- BetterBags' money frames (the backpack's and the bank's, in both bag designs) show everyone's gold under
+-- their own tooltip. Every frame is updated as it is made and as the world loads (frames/money.lua), so
+-- each one is found there, those made before this addon loaded included.
+local moneyFrames = setmetatable({}, { __mode = "k" })
+
+local function showGold(overlay)
+    if not db or not GameTooltip:IsOwned(overlay) then return end
+    GameTooltip:AddLine(" ")
+    GameTooltip:AddLine(L["GOLD_TITLE"], 1, 0.82, 0)
+    for _, row in ipairs(goldRows()) do
+        GameTooltip:AddDoubleLine(row.text, coins(row.count), 1, 1, 1, 1, 1, 1)
+    end
+    GameTooltip:Show()
+end
+
+local function hookMoneyFrames()
+    local money = BetterBags:GetModule('MoneyFrame', true)
+    if not money or not money.moneyProto or not money.moneyProto.Update then return end
+    hooksecurefunc(money.moneyProto, "Update", function(m)
+        if not m.overlay or moneyFrames[m.overlay] then return end
+        moneyFrames[m.overlay] = true
+        m.overlay:HookScript("OnEnter", showGold)
+    end)
 end
 
 local function slash(input)
@@ -1018,6 +1047,7 @@ local function onReady()
     if _G.SendMail then hooksecurefunc("SendMail", onSendMail) end
 
     hookTooltips()
+    hookMoneyFrames()
     config:AddPluginConfig(L["TITLE"], options)
 
     _G.SLASH_BETTERBAGSSYNC1 = "/bbsync"
