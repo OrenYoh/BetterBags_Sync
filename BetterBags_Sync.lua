@@ -19,7 +19,8 @@ local config = BetterBags:GetModule('Config')
 -----------------------------
 -- BetterBags_SyncDB = {
 --     version = 1,
---     options = { faction, realms, showCurrent, showGuilds },
+--     options = { faction, realms, showCurrent, showGuilds, modifier, popout, tooltipGear, tooltipReagents,
+--                 tooltipMisc, tooltipCurrencies, tooltipGold },
 --     characters = { ["Name-Realm"] = {
 --         name, realm, class, faction, guild (a guilds key),
 --         bags = { [bagID] = counts },     -- what is in each bag and bank container
@@ -45,6 +46,12 @@ local DEFAULT_OPTIONS = {
     showGuilds = true,
     modifier = "none",  -- "none", "shift", "ctrl" or "alt": the lines show only while it is held
     popout = false,     -- the lines in a tooltip of their own under the item's
+    -- The tooltips the lines are added to, by what they show (everything is counted all the same).
+    tooltipGear = true,
+    tooltipReagents = true,
+    tooltipMisc = true, -- every other item, caged battle pets included
+    tooltipCurrencies = true,
+    tooltipGold = true, -- BetterBags' money frames
 }
 local db
 
@@ -689,8 +696,30 @@ local function isScanner(tooltip)
     return tooltip.GetAnchorType ~= nil and tooltip:GetAnchorType() == "ANCHOR_NONE" and tooltip:GetNumPoints() == 0
 end
 
+-- The item classes a tooltip type is (Enum.ItemClass; its numbers on clients without it).
+local itemClass = _G.Enum and _G.Enum.ItemClass or {}
+local GEAR_CLASSES = { [itemClass.Weapon or 2] = true, [itemClass.Armor or 4] = true, [itemClass.Profession or 19] = true }
+local REAGENT_CLASSES = { [itemClass.Reagent or 5] = true, [itemClass.Tradegoods or 7] = true }
+local getItemInfo = _G.C_Item and _G.C_Item.GetItemInfo or _G.GetItemInfo
+
+-- Whether an item's tooltip shows the lines, as the Tooltip Types options say: gear, crafting reagents,
+-- or every other item. A caged battle pet is a misc item.
+local function itemTypeShown(kind, id)
+    if kind ~= "item" then return db.options.tooltipMisc end
+    local classID = select(6, getItemInfoInstant(id))
+    if GEAR_CLASSES[classID] then return db.options.tooltipGear end
+    -- isCraftingReagent (retail): reagents of other classes (gems, herbs sold as consumables...).
+    if REAGENT_CLASSES[classID] or select(17, getItemInfo(id)) then return db.options.tooltipReagents end
+    return db.options.tooltipMisc
+end
+
 local function show(tooltip, kind, id, resize)
     if not db or not tooltip or not id or isSecret(id) or isScanner(tooltip) then return end
+    if kind == "currency" then
+        if not db.options.tooltipCurrencies then return end
+    elseif not itemTypeShown(kind, id) then
+        return
+    end
     render(tooltip, { kind = kind, id = id, single = tooltip.AddDoubleLine == nil, resize = resize })
 end
 
@@ -800,65 +829,124 @@ end
 --- Options (BetterBags' settings window, Integrations)
 -----------------------------
 local options = {
-    description = {
-        type = "description",
+    characters = {
+        type = "group",
         order = 1,
-        name = L["OPTIONS_DESC"],
+        inline = true,
+        name = L["OPTIONS_GROUP_CHARACTERS"],
+        args = {
+            showCurrent = {
+                type = "toggle",
+                order = 1,
+                width = "full",
+                name = L["OPTIONS_SHOW_CURRENT"],
+                get = function() return db.options.showCurrent end,
+                set = function(_, value) db.options.showCurrent = value end,
+            },
+            showGuilds = {
+                type = "toggle",
+                order = 2,
+                width = "full",
+                name = L["OPTIONS_SHOW_GUILDS"],
+                get = function() return db.options.showGuilds end,
+                set = function(_, value) db.options.showGuilds = value end,
+            },
+            faction = {
+                type = "select",
+                order = 3,
+                name = L["OPTIONS_FACTION"],
+                values = { all = L["OPTIONS_FACTION_ALL"], same = L["OPTIONS_FACTION_SAME"] },
+                sorting = { "all", "same" },
+                get = function() return db.options.faction end,
+                set = function(_, value) db.options.faction = value end,
+            },
+            realms = {
+                type = "select",
+                order = 4,
+                name = L["OPTIONS_REALMS"],
+                values = { all = L["OPTIONS_REALMS_ALL"], connected = L["OPTIONS_REALMS_CONNECTED"], current = L["OPTIONS_REALMS_CURRENT"] },
+                sorting = { "all", "connected", "current" },
+                get = function() return db.options.realms end,
+                set = function(_, value) db.options.realms = value end,
+            },
+        },
     },
-    showCurrent = {
-        type = "toggle",
+    tooltip = {
+        type = "group",
         order = 2,
-        width = "full",
-        name = L["OPTIONS_SHOW_CURRENT"],
-        get = function() return db.options.showCurrent end,
-        set = function(_, value) db.options.showCurrent = value end,
+        inline = true,
+        name = L["OPTIONS_GROUP_TOOLTIP"],
+        args = {
+            modifier = {
+                type = "select",
+                order = 1,
+                name = L["OPTIONS_MODIFIER"],
+                values = { none = L["OPTIONS_MODIFIER_NONE"], shift = L["OPTIONS_MODIFIER_SHIFT"], ctrl = L["OPTIONS_MODIFIER_CTRL"], alt = L["OPTIONS_MODIFIER_ALT"] },
+                sorting = { "none", "shift", "ctrl", "alt" },
+                get = function() return db.options.modifier end,
+                set = function(_, value) db.options.modifier = value end,
+            },
+            popout = {
+                type = "toggle",
+                order = 2,
+                width = "full",
+                name = L["OPTIONS_POPOUT"],
+                desc = L["OPTIONS_POPOUT_DESC"],
+                get = function() return db.options.popout end,
+                set = function(_, value)
+                    db.options.popout = value
+                    hidePopout()
+                end,
+            },
+        },
     },
-    showGuilds = {
-        type = "toggle",
+    types = {
+        type = "group",
         order = 3,
-        width = "full",
-        name = L["OPTIONS_SHOW_GUILDS"],
-        get = function() return db.options.showGuilds end,
-        set = function(_, value) db.options.showGuilds = value end,
-    },
-    faction = {
-        type = "select",
-        order = 4,
-        name = L["OPTIONS_FACTION"],
-        values = { all = L["OPTIONS_FACTION_ALL"], same = L["OPTIONS_FACTION_SAME"] },
-        sorting = { "all", "same" },
-        get = function() return db.options.faction end,
-        set = function(_, value) db.options.faction = value end,
-    },
-    realms = {
-        type = "select",
-        order = 5,
-        name = L["OPTIONS_REALMS"],
-        values = { all = L["OPTIONS_REALMS_ALL"], connected = L["OPTIONS_REALMS_CONNECTED"], current = L["OPTIONS_REALMS_CURRENT"] },
-        sorting = { "all", "connected", "current" },
-        get = function() return db.options.realms end,
-        set = function(_, value) db.options.realms = value end,
-    },
-    modifier = {
-        type = "select",
-        order = 6,
-        name = L["OPTIONS_MODIFIER"],
-        values = { none = L["OPTIONS_MODIFIER_NONE"], shift = L["OPTIONS_MODIFIER_SHIFT"], ctrl = L["OPTIONS_MODIFIER_CTRL"], alt = L["OPTIONS_MODIFIER_ALT"] },
-        sorting = { "none", "shift", "ctrl", "alt" },
-        get = function() return db.options.modifier end,
-        set = function(_, value) db.options.modifier = value end,
-    },
-    popout = {
-        type = "toggle",
-        order = 7,
-        width = "full",
-        name = L["OPTIONS_POPOUT"],
-        desc = L["OPTIONS_POPOUT_DESC"],
-        get = function() return db.options.popout end,
-        set = function(_, value)
-            db.options.popout = value
-            hidePopout()
-        end,
+        inline = true,
+        name = L["OPTIONS_GROUP_TYPES"],
+        args = {
+            tooltipGear = {
+                type = "toggle",
+                order = 1,
+                width = "full",
+                name = L["OPTIONS_TYPE_GEAR"],
+                get = function() return db.options.tooltipGear end,
+                set = function(_, value) db.options.tooltipGear = value end,
+            },
+            tooltipReagents = {
+                type = "toggle",
+                order = 2,
+                width = "full",
+                name = L["OPTIONS_TYPE_REAGENTS"],
+                get = function() return db.options.tooltipReagents end,
+                set = function(_, value) db.options.tooltipReagents = value end,
+            },
+            tooltipMisc = {
+                type = "toggle",
+                order = 3,
+                width = "full",
+                name = L["OPTIONS_TYPE_MISC"],
+                get = function() return db.options.tooltipMisc end,
+                set = function(_, value) db.options.tooltipMisc = value end,
+            },
+            tooltipCurrencies = {
+                type = "toggle",
+                order = 4,
+                width = "full",
+                name = L["OPTIONS_TYPE_CURRENCIES"],
+                get = function() return db.options.tooltipCurrencies end,
+                set = function(_, value) db.options.tooltipCurrencies = value end,
+            },
+            tooltipGold = {
+                type = "toggle",
+                order = 5,
+                width = "full",
+                name = L["OPTIONS_TYPE_GOLD"],
+                get = function() return db.options.tooltipGold end,
+                set = function(_, value) db.options.tooltipGold = value end,
+            },
+        },
     },
 }
 -----------------------------
@@ -913,7 +1001,7 @@ end
 local moneyFrames = setmetatable({}, { __mode = "k" })
 
 local function showGold(overlay)
-    if not db or not GameTooltip:IsOwned(overlay) then return end
+    if not db or not db.options.tooltipGold or not GameTooltip:IsOwned(overlay) then return end
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine(L["GOLD_TITLE"], 1, 0.82, 0)
     for _, row in ipairs(goldRows()) do
