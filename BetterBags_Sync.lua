@@ -683,8 +683,14 @@ local function render(tooltip, entry)
     end
 end
 
+-- An addon reading an item's text (Pawn, TipTac...) sets it on a hidden tooltip of its own, owned with
+-- ANCHOR_NONE and never placed; were it shown to, the pop-out would follow it off the screen.
+local function isScanner(tooltip)
+    return tooltip.GetAnchorType ~= nil and tooltip:GetAnchorType() == "ANCHOR_NONE" and tooltip:GetNumPoints() == 0
+end
+
 local function show(tooltip, kind, id, resize)
-    if not db or not tooltip or not id or isSecret(id) then return end
+    if not db or not tooltip or not id or isSecret(id) or isScanner(tooltip) then return end
     render(tooltip, { kind = kind, id = id, single = tooltip.AddDoubleLine == nil, resize = resize })
 end
 
