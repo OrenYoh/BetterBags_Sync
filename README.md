@@ -11,3 +11,4 @@
 <li>Gold of every character, guild bank and the Warband bank (hover the gold in your bags, or use <code>/bbsync gold</code>&nbsp;to get a summary)</li>
 <li>Currencies of every character (warband-wide currencies, the same for everyone, are left out)</li>
 </ul>
+<p dir="auto">Every saved character is listed in the options (BetterBags settings &gt; Integrations &gt; Sync), where you can remove the ones you no longer play (or use <code>/bbsync list</code> and <code>/bbsync remove Name-Realm</code>).</p>

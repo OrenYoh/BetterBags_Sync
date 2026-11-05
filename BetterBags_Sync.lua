@@ -828,6 +828,28 @@ end
 
 --- Options (BetterBags' settings window, Integrations)
 -----------------------------
+local function coloredName(character, key)
+    local r, g, b = classColor(character.class)
+    local name = character.name and character.realm and (character.name .. "-" .. character.realm) or key
+    return string.format("|cff%02x%02x%02x%s|r", r * 255, g * 255, b * 255, name)
+end
+
+-- The saved characters' keys, by realm then name.
+local function savedKeys()
+    local keys = {}
+    for key in pairs(db.characters) do table.insert(keys, key) end
+    table.sort(keys, function(a, c)
+        local ca, cc = db.characters[a], db.characters[c]
+        local ra, rc = ca.realm or "", cc.realm or ""
+        if ra ~= rc then return ra < rc end
+        return (ca.name or a) < (cc.name or c)
+    end)
+    return keys
+end
+
+-- The character picked in Saved Characters, waiting for Remove.
+local selectedCharacter
+
 local options = {
     characters = {
         type = "group",
@@ -945,6 +967,72 @@ local options = {
                 name = L["OPTIONS_TYPE_GOLD"],
                 get = function() return db.options.tooltipGold end,
                 set = function(_, value) db.options.tooltipGold = value end,
+            },
+        },
+    },
+    saved = {
+        type = "group",
+        order = 4,
+        inline = true,
+        name = L["OPTIONS_GROUP_SAVED"],
+        args = {
+            list = {
+                type = "description",
+                order = 1,
+                width = "full",
+                name = function()
+                    local lines = {}
+                    for _, key in ipairs(savedKeys()) do
+                        local line = coloredName(db.characters[key], key)
+                        if key == currentKey() then line = line .. " " .. L["OPTIONS_SAVED_CURRENT"] end
+                        table.insert(lines, line)
+                    end
+                    if #lines == 0 then return L["OPTIONS_SAVED_NONE"] end
+                    return table.concat(lines, "\n")
+                end,
+            },
+            character = {
+                type = "select",
+                order = 2,
+                name = L["OPTIONS_REMOVE_CHARACTER"],
+                desc = L["OPTIONS_REMOVE_DESC"],
+                values = function()
+                    local values = {}
+                    for _, key in ipairs(savedKeys()) do
+                        if key ~= currentKey() then values[key] = coloredName(db.characters[key], key) end
+                    end
+                    return values
+                end,
+                sorting = function()
+                    local sorting = {}
+                    for _, key in ipairs(savedKeys()) do
+                        if key ~= currentKey() then table.insert(sorting, key) end
+                    end
+                    return sorting
+                end,
+                get = function()
+                    if selectedCharacter and not db.characters[selectedCharacter] then selectedCharacter = nil end
+                    return selectedCharacter
+                end,
+                set = function(_, value) selectedCharacter = value end,
+            },
+            remove = {
+                type = "execute",
+                order = 3,
+                name = L["OPTIONS_REMOVE"],
+                disabled = function()
+                    return not selectedCharacter or not db.characters[selectedCharacter] or selectedCharacter == currentKey()
+                end,
+                confirm = function()
+                    local character = selectedCharacter and db.characters[selectedCharacter]
+                    return (L["OPTIONS_REMOVE_CONFIRM"]:gsub("_name_", character and coloredName(character, selectedCharacter) or ""))
+                end,
+                func = function()
+                    if selectedCharacter and selectedCharacter ~= currentKey() then
+                        db.characters[selectedCharacter] = nil
+                    end
+                    selectedCharacter = nil
+                end,
             },
         },
     },
