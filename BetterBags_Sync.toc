@@ -3,7 +3,7 @@
 ## Category: Inventory
 ## Notes: Shows in item tooltips how many of an item your other characters have in their bags and banks
 ## Author: OrenYoh
-## Version: 1.0.0
+## Version: 1.1.0
 ## IconTexture: Interface\AddOns\BetterBags_Sync\images\sync.png
 ## Dependencies: BetterBags
 ## SavedVariables: BetterBags_SyncDB
